@@ -6,7 +6,7 @@ RAYLIB_HEADER="lib/"
 RAYLIB_LIB="lib/"
 
 # Source file
-CPP="src/main.cpp src/App.cpp"
+CPP="src/main.cpp src/App.cpp src/AppUI.cpp src/raygui_impl.cpp"
 
 # Output executable
 OUT="game of life.exe"

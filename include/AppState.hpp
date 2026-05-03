@@ -13,13 +13,16 @@ simulation reads state
 rendering uses state
 
 */
-
+#pragma once
 
 struct AppState {
     int running = false;
     
-    int mode = 0; // paused - 0, demo 1 , test - 2, measure - 3
+    int mode = 0; // demo - 0 , test - 1, measure - 2
     int algorithm = 0; // 0=seq,1=parallel
+    int randomFillPercent = 30;
+    int randomSeed = 1;
+
 
     int cellsX = 10;
     int cellsY = 5;

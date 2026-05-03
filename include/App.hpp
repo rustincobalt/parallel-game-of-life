@@ -4,7 +4,9 @@
 extern "C" {
     #include "raygui.h"
 }
+
 #include "AppState.hpp"
+#include "AppUI.hpp"
 
 #include <string>
 
@@ -22,24 +24,25 @@ using std::string;
 class App {
 
 private:
-    int y;
-    int x;
-    float pixelSize;
+    int windowY;
+    int windowX;
     Color bgColor;
     int targetFPS;
     string windowName;
-
     
-    void handleUI(AppState&);
-    void drawUI(const AppState&);
-    void drawGrid(const AppState&);
+
+    // App State (controls Game Simulation)
+    AppState state;
+
+    // UI specific
+    AppUI ui;
     void runAppLoop();
 
 
 
 public:
 
-    App(int y, int x, float pixelSize, int targetFPS = 120, string windowName = "Game of Life",  Color bgColor = BLACK);
+    App(int y, int x, int targetFPS = 120, string windowName = "Game of Life",  Color bgColor = BLACK);
     void Launch();
     
 };
