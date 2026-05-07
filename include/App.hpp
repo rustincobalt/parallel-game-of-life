@@ -1,14 +1,16 @@
 #pragma once
 #include "..\lib\raylib.h"
-
 extern "C" {
-    #include "raygui.h"
+    #include "..\lib\raygui.h"
 }
 
 #include "AppState.hpp"
 #include "AppUI.hpp"
+#include "LifeSeq.hpp"
 
 #include <string>
+#include <memory>
+
 
 using std::string;
 
@@ -29,16 +31,31 @@ private:
     Color bgColor;
     int targetFPS;
     string windowName;
-    
 
     // App State (controls Game Simulation)
     AppState state;
 
     // UI specific
     AppUI ui;
+
+    // Texture for grid
+    Texture2D gridTexture;
+
+    // Game of Life logic
+    std::unique_ptr<Life> simulation;
+
+
+    // Main Loop
     void runAppLoop();
+    
+    // Handle
+    void handleEvents();
 
-
+    // HELP FUNCTIONS
+    
+    void generateTextureFromImage(Texture2D& texture, int w, int h);
+    void initNewSimulation();
+    void recreateSimulation();
 
 public:
 

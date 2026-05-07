@@ -2,10 +2,9 @@
 
 
 extern "C" {
-    #include "raygui.h"
+    #include "..\lib\raygui.h"
 }
 
-#include <algorithm>
 
 struct AppState;
 
@@ -23,11 +22,15 @@ class AppUI{
     float textSpacing;
     float blockSpacing;
 
+    // --- EditModes ---
+    bool cellsXEditMode;
+    bool cellsYEditMode;
+
 
     // --- Drop Down ---
     bool dropDown00EditMode;
     bool dropDown01EditMode;
-
+    
     float dropDownDemoPositionY;
     float dropDownAlgoPositionY;
 
@@ -49,7 +52,7 @@ class AppUI{
     public:
     AppUI();
     AppUI(AppState&);
-    void drawGrid();
+    // void drawGrid(); TODO: DELETE
     void handleUI();
 
 };

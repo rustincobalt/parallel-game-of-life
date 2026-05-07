@@ -28,17 +28,20 @@ Life::GridCorners::GridCorners(int rows, int width){
         bottomRightReal = realBottomRow * width + realRight;
     }
 }
-  
-Life::Life(int h, int w): rows(h+2), width(w+2), DEAD_COLOR(0xFF000000), ALIVE_COLOR(0xFF00FF00) 
-{   
-    
+
+
+Life::Life(int h, int w): Life(h, w, 0xFF000000, 0xFF00FF00) {}
+
+Life::Life(int h, int w, uint32_t deadColor, uint32_t aliveColor)
+    : rows(h+2), width(w+2),
+      DEAD_COLOR(deadColor), ALIVE_COLOR(aliveColor), nextGrid(rows*width)
+{
     CORNERS = GridCorners(rows, width);
-    grid.assign(rows*width, 0);
+    currGrid.assign(rows*width, 0);
+    
     pixels.resize(h*w);
 
-    PIXEL_LUT.resize(2);
-    PIXEL_LUT[0] = DEAD_COLOR;
-    PIXEL_LUT[1] = ALIVE_COLOR;
+    PIXEL_LUT = { DEAD_COLOR, ALIVE_COLOR };
 }
 
 
@@ -110,7 +113,7 @@ void Life::calcPixelsRowRange(int stRow, int enRow)
 {
     const int realWidth = width - 2;
 
-    const uint8_t* srcPtr = grid.data();
+    const uint8_t* srcPtr = currGrid.data();
     uint32_t* dstPtr = pixels.data();
 
     for (int row = stRow; row <= enRow; row++)
@@ -132,4 +135,42 @@ void Life::calcPixelsRowRange(int stRow, int enRow)
 const vector<uint32_t>& Life::getPixels()
 {
     return pixels;
+}
+
+
+void Life::generateRandomGrid(int seed, int fillPercent)
+{
+    std::mt19937 rng(seed);
+
+    std::uniform_int_distribution<int>
+        dist(0, 99);
+
+    const int realWidth = width - 2;
+    const int realHeight = rows - 2;
+
+    uint8_t* gridPtr = currGrid.data();
+
+    for (int row = 1; row <= realHeight; row++)
+    {
+        uint8_t* cellsRow =
+            gridPtr + row * width + 1;
+
+        for (int col = 0; col < realWidth; col++)
+        {
+            cellsRow[col] =
+                dist(rng) < fillPercent;
+        }
+    }
+
+    updateHorizontalPadding(
+        currGrid,
+        1,
+        realHeight);
+
+    updateVerticalPadding(
+        currGrid,
+        0,
+        width - 1);
+
+    updateCornersPadding(currGrid);
 }

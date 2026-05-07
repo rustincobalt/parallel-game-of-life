@@ -11,6 +11,8 @@ AppUI::AppUI(){
     textSpacing = h - margin/2;
     blockSpacing = h + margin;
 
+    cellsXEditMode = true;
+    cellsYEditMode = true;
     dropDown00EditMode = false;
     dropDown01EditMode = false;
 
@@ -28,14 +30,14 @@ void AppUI::drawUIBase() {
     
     
     // --- Mode-specific UI ---
-    if (state->mode == 0) 
+    if (state->getMode() == 0) 
         drawDemoUI();
 
-    else if (state->mode == 1) { // TEST
+    else if (state->getMode() == 1) { // TEST
         drawTestUI();
     }
 
-    else if (state->mode == 2) { // MEASURE
+    else if (state->getMode() == 2) { // MEASURE
         drawMeasureUI();
     }
 }
@@ -56,32 +58,50 @@ void AppUI::drawDemoUI(){
     GuiLabel({x, y+stepY, w, h}, "Size X");
     stepY += textSpacing;
 
-    static int editX = 0;
-    GuiValueBox({x, y+stepY, w, h}, nullptr, &state->cellsX, 10, 500, editX);
+    // static int editX = 0; TODO: DELETE
+    static int cellsX = state->getCellsX();
+    if( GuiValueBox({x, y+stepY, w, h}, nullptr, &cellsX, 4, 10'000, cellsXEditMode)){
+        state->setCellsX(cellsX);
+        cellsXEditMode = !cellsXEditMode;
+    }
     stepY += blockSpacing;
 
     // Size Y
     GuiLabel({x, y+stepY, w, h}, "Size Y");
     stepY += textSpacing;
 
-    static int editY = 0;
-    GuiValueBox({x, y+stepY, w, h}, nullptr, &state->cellsY, 10, 500, editY);
+    // static int editY = 0;
+    static int cellsY = state->getCellsY();
+    if (GuiValueBox({x, y+stepY, w, h}, nullptr, &cellsY, 4, 10'000, cellsYEditMode)){
+        state->setCellsY(cellsY);
+        cellsYEditMode = !cellsYEditMode; 
+    }
     stepY += blockSpacing;
 
     // Random fill %
     GuiLabel({x, y+stepY, w, h}, "Fill %");
     stepY += textSpacing;
 
-    GuiSlider({x+2*margin, y+stepY, w-5*margin, h}, "0", "100", 
-                (float*)&state->randomFillPercent, 0, 100);
+
+    static float randomFillPercent = (float)state->getRandomFillPercent();
+    if (GuiSlider({x + 2 * margin, y + stepY, w - 5 * margin, h}, 
+        "0", "100", &randomFillPercent, 0, 100)) 
+        {
+      state->setRandomFillPercent((int)randomFillPercent);
+    }
+    GuiLabel({w/2, y+stepY, 60, h}, TextFormat("%d%%", (int)randomFillPercent));
     stepY += blockSpacing;
 
     // Seed
     GuiLabel({x, y+stepY, w, h}, "Seed");
     stepY += textSpacing;
 
-    static int editSeed = 0;
-    GuiValueBox({x, y+stepY, w, h}, nullptr, &state->randomSeed, 0, 100000, editSeed);
+    static bool editSeed = false;
+    static int randomSeed = state->getRandomSeed();
+    if (GuiValueBox({x, y+stepY, w, h}, nullptr, &randomSeed, 0, 100000, editSeed)){
+        editSeed = !editSeed;
+        state->setRandomSeed(randomSeed);
+}
     stepY += blockSpacing;
 
     // Algorithm Drop Down Skip
@@ -91,14 +111,14 @@ void AppUI::drawDemoUI(){
 
     // Start/Stop
     if (GuiButton({x, y+stepY, w, h},
-        state->running ? "Stop" : "Start")) {
-        state->running = !state->running;
+        state->isRunning() ? "Stop" : "Start")) {
+        state->toggleRunning();
     }
     stepY += blockSpacing;
 
-    // Reset
-    if (GuiButton({x, y+stepY, w, h}, "Reset")) {
-        state->running = false;
+    // Generate
+    if (GuiButton({x, y+stepY, w, h}, "Generate")) {
+        state->requestGridGenerate();
     }
     stepY += blockSpacing;
 
@@ -124,8 +144,8 @@ void AppUI::drawTestUI(){
     stepY += blockSpacing;
 
     if (GuiButton({x, y+stepY, w, h},
-        state->running ? "Stop" : "Start")) {
-        state->running = !state->running;
+        state->isRunning() ? "Stop" : "Start")) {
+        state->toggleRunning();
     }
     
 }
@@ -147,12 +167,12 @@ void AppUI::drawMeasureUI()
     stepY += textSpacing + blockSpacing;
 
     if (GuiButton({x, y+stepY, w, h}, "Start")) {
-        state->running = true;
+        state->setRunning(true);
     }
     stepY += blockSpacing;
 
     if (GuiButton({x, y+stepY, w, h}, "Abort")) {
-        state->running = false;
+        state->setRunning(false);
     }
     stepY += blockSpacing;
 }
@@ -162,11 +182,13 @@ void AppUI::drawModeDropdown()
     // --- Mode dropdown ---
     GuiLabel({x, dropDownDemoPositionY, w, h}, "Mode");
 
+    int mode = state->getMode();
     if (GuiDropdownBox({x, dropDownDemoPositionY+textSpacing, w, h},
         "Demo;Test;Measure",
-        &state->mode,
+        &mode,
         dropDown00EditMode)) {
         dropDown00EditMode = !dropDown00EditMode;
+        state->setMode(mode);
     }
     
 }
@@ -175,12 +197,14 @@ void AppUI::drawAlgorithmDropdown()
 {
 
     // --- Algo dropdown ---
+    int algorithm = state->getAlgorithm();
     GuiLabel({x, dropDownAlgoPositionY, w, h}, "Algorithm");
         if (GuiDropdownBox({x, dropDownAlgoPositionY+textSpacing, w, h},
             "Sequential;Parallel",
-            &state->algorithm,
+            &algorithm,
             dropDown01EditMode)) {
             dropDown01EditMode = !dropDown01EditMode;
+            state->setAlgorithm(algorithm);
         }
 
 }
@@ -202,32 +226,32 @@ void AppUI::handleUI()
     drawUIDropdowns();
 }
 
-void AppUI::drawGrid(){
+// void AppUI::drawGrid(){
 
-    int availableWidth = GetScreenWidth() - this->panelWidth;
-    int availableHeight = GetScreenHeight();
+//     int availableWidth = GetScreenWidth() - this->panelWidth;
+//     int availableHeight = GetScreenHeight();
 
-    int cellSize = std::min(
-        availableWidth / state->cellsX,
-        availableHeight / state->cellsY
-    );
+//     int cellSize = std::min(
+//         availableWidth / state->cellsX,
+//         availableHeight / state->cellsY
+//     );
 
-    cellSize = std::min(cellSize, state->maxCellSize);
+//     cellSize = std::min(cellSize, state->maxCellSizePX);
     
     
-    float startX = this->panelWidth + (availableWidth - state->cellsX * cellSize) / 2.;
-    float startY = (availableHeight - state->cellsY * cellSize) / 2.;
+//     float startX = this->panelWidth + (availableWidth - state->cellsX * cellSize) / 2.;
+//     float startY = (availableHeight - state->cellsY * cellSize) / 2.;
 
-    for (int y = 0; y < state->cellsY; y++) {
-        for (int x = 0; x < state->cellsX; x++) {
+//     for (int y = 0; y < state->cellsY; y++) {
+//         for (int x = 0; x < state->cellsX; x++) {
 
-            DrawRectangleLines(
-                startX + x * cellSize,
-                startY + y * cellSize,
-                cellSize,
-                cellSize,
-                DARKGRAY
-            );
-        }
-    }
-}
+//             DrawRectangleLines(
+//                 startX + x * cellSize,
+//                 startY + y * cellSize,
+//                 cellSize,
+//                 cellSize,
+//                 DARKGRAY
+//             );
+//         }
+//     }
+// }

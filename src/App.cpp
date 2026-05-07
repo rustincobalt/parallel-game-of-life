@@ -2,29 +2,167 @@
 
 App::App(int y, int x, int targetFPS, string windowName, Color bgColor):
 windowY(y), windowX(x), targetFPS(targetFPS), windowName(windowName), bgColor(bgColor)
-{
+{   
     ui = AppUI(state);
+    simulation = nullptr;
+
+    // IMPORTANT: can't generate Texture before InitWindow
+    // generateTextureFromImage(gridTexture, state.getCellsX(), state.getCellsX());
+}
+
+void App::generateTextureFromImage(Texture2D& texture, int w, int h){
+    if (IsTextureValid(gridTexture))
+        UnloadTexture(gridTexture);
+    
+    Image image = GenImageColor(w, h, bgColor);
+    
+    texture = LoadTextureFromImage(image);
+
+    UnloadImage(image);
+
+    // SetTextureFilter(
+    // gridTexture,
+    // TEXTURE_FILTER_POINT);
 }
 
 
+// void App::recreateSimulation()
+// {
+//     generateTextureFromImage(gridTexture, state.getCellsX(), state.getCellsY());
+
+//     UpdateTexture(
+//         gridTexture,
+//         simulation->getPixels().data());
+// }
+
+void App::initNewSimulation(){
+      switch (state.getAlgorithm())
+    {
+        default:
+            simulation =
+                std::make_unique<LifeSeq>(
+                    state.getCellsY(),
+                    state.getCellsX());
+            state.setInitStatus(true);
+            break;
+
+        // case 1:
+        //     simulation =
+        //         std::make_unique<LifeParallel>(
+        //             state.getCellsY(),
+        //             state.getCellsX(),
+        //             DEAD_COLOR,
+        //             ALIVE_COLOR);
+        //     break;
+    }
+
+}
+
+void App::handleEvents(){
+
+    if (IsWindowResized())
+        state.updateGridLayout(GetScreenWidth(), GetScreenHeight());
+    
+    
+    if (state.consumeFlag(
+            AppState::LAYOUT_CHANGED))    
+        state.updateGridLayout(GetScreenWidth(), GetScreenHeight());
+
+
+        
+
+    if (state.consumeFlag(
+            AppState::GRID_GENERATE))
+    {
+        state.setRunning(false);
+
+        generateTextureFromImage(gridTexture, state.getCellsX(), state.getCellsY());
+
+        initNewSimulation();
+
+        simulation->generateRandomGrid(
+            state.getRandomSeed(),
+            state.getRandomFillPercent());
+
+        simulation->calcPixels();
+
+        UpdateTexture(
+            gridTexture,
+            simulation->getPixels().data());
+    }
+
+
+
+    if (state.consumeFlag(
+            AppState::MODE_CHANGED))
+    {
+        state.setRunning(false);
+        initNewSimulation();
+    }
+
+
+    // if (ui.gridSizeChanged())
+    // {
+    //     recreateSimulation();
+
+    //     state.updateGridLayout();
+    // }
+}
 
 void App::runAppLoop(){
     
     while (!WindowShouldClose()) {
 
-        // --- 1. HANDLE UI ---
+        handleEvents();
 
-        // --- 2. UPDATE SIMULATION ---
-        if (state.running) {
-            // currently empty
+        // --- UPDATE SIMULATION ---
+        if (state.isRunning()) {
+            simulation->updateGrid();
+            simulation->calcPixels();
+            UpdateTexture(gridTexture, 
+                simulation->getPixels().data());
         }
 
-        // --- 3. DRAW ---
+        // --- DRAW ---
         BeginDrawing();
         ClearBackground(bgColor);
             
+            // ui.drawGrid();
+
+            // Defines the section of the original texture image to draw
+            Rectangle source = {
+                0.0f,
+                0.0f,
+                (float)gridTexture.width,
+                -(float)gridTexture.height
+            };
+
+            // Defines where to draw the texture on the screen, using {x, y, width, height} in screen coordinates.
+            Rectangle dest = {
+                state.getGridStartX(),
+                state.getGridStartY(),
+                (float)state.getGridDrawWidth(),
+                (float)state.getGridDrawHeight()
+            };
+
+           DrawTexturePro(
+                gridTexture,
+                source,
+                dest,
+                {0.0f, 0.0f},
+                0.0f,
+                WHITE); // Use WHITE to display the texture normally without color change.
+            
+
+            DrawRectangleLines(
+                state.getGridStartX(),
+                state.getGridStartY(),
+                (float)state.getGridDrawWidth(),
+                (float)state.getGridDrawHeight(),
+                LIGHTGRAY
+            );
+
             ui.handleUI();
-            ui.drawGrid(); // empty for now
 
         EndDrawing();
     }
@@ -39,7 +177,10 @@ void App::Launch(){
     InitWindow(windowX, windowY, windowName.c_str());
     SetTargetFPS(targetFPS);
     GuiSetStyle(DEFAULT, TEXT_SIZE, 20); 
-    
+   
+    state.updateGridLayout(GetScreenWidth(), GetScreenHeight());
+    generateTextureFromImage(gridTexture, state.getCellsX(), state.getCellsX());
+
     this->runAppLoop();
 
     CloseWindow();

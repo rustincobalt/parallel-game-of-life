@@ -6,10 +6,10 @@ RAYLIB_HEADER="lib/"
 RAYLIB_LIB="lib/"
 
 # Source file
-CPP="src/main.cpp src/App.cpp src/AppUI.cpp src/raygui_impl.cpp"
+CPP="src/main.cpp src/App.cpp src/AppState.cpp src/AppUI.cpp src/raygui_impl.cpp src/Life.cpp src/LifeSeq.cpp"
 
 # Output executable
-OUT="game of life.exe"
+OUT="game of life0.exe"
 
 # Compile with g++
 g++ $CPP -o "$OUT" -I "$PROJECT_HEADERS" -I "$RAYLIB_HEADER" -L "$RAYLIB_LIB" -lraylib -lopengl32 -lgdi32 -lwinmm -D__WINDOWS_MM__

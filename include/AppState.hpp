@@ -1,31 +1,112 @@
-/*
-
-Without it:
-
-UI variables get scattered
-simulation reads random fields from App
-hard to scale
-
-With it:
-
-UI edits state
-simulation reads state
-rendering uses state
-
-*/
 #pragma once
 
-struct AppState {
-    int running = false;
+// TODO: DELETE
+// #include "..\lib\raylib.h"
+
+// extern "C" {
+//     #include "..\lib\raygui.h"
+// }
+#include <algorithm>
+
+
+class AppState {
+    public:
+
+    enum DirtyFlags {
+        NONE            = 0,
+        WINDOW_RESIZED  = 1 << 0,
+        LAYOUT_CHANGED  = 1 << 1, // Any Drawing Grid change: height or cell size in pixels
+        GRID_GENERATE   = 1 << 2,
+        MODE_CHANGED    = 1 << 3,
+
+        // SIMULATION_RESET = 1 << 2,
+    };
+
+
+private:
+
+    // --- Simulation ---
+    bool isInit;
+    bool running;
+
+    int mode;
+    int algorithm;
+
+    int randomFillPercent;
+    int randomSeed;
+
+    int cellsX;
+    int cellsY;
+
+    // --- Rendering ---
+    double maxCellSizePX;
+    double cellSizePX;
+
+    float gridStartX;
+    float gridStartY;
+
+    double gridDrawWidth;
+    double gridDrawHeight;
+
+    // --- Layout ---
+    int panelWidth;
+
+    // --- Flags ---
+    int dirtyFlags;
+
+public:
+
+    AppState();
+
+    // --- Layout ---
+    void updateGridLayout(int screenWidth, int screenHeight);
     
-    int mode = 0; // demo - 0 , test - 1, measure - 2
-    int algorithm = 0; // 0=seq,1=parallel
-    int randomFillPercent = 30;
-    int randomSeed = 1;
 
+    // --- Flags ---
+    void addFlag(DirtyFlags flag);
 
-    int cellsX = 10;
-    int cellsY = 5;
+    bool consumeFlag(DirtyFlags flag);
 
-    int maxCellSize = 20;
+    // --- Setters ---
+
+    void requestGridGenerate(); // Triggered by Generate Button
+
+    void setRunning(bool value);
+    void setInitStatus(bool value);
+    void toggleRunning();
+
+    void setMode(int value);
+    void setAlgorithm(int value);
+
+    void setRandomFillPercent(int value);
+    void setRandomSeed(int value);
+
+    void setCellsX(int value);
+    void setCellsY(int value);
+
+    void setMaxCellSizePX(int value);
+    
+    // --- Getters ---
+    bool isRunning() const;
+
+    int getMode() const;
+    int getAlgorithm() const;
+
+    int getRandomFillPercent() const;
+    int getRandomSeed() const;
+
+    int getCellsX() const;
+    int getCellsY() const;
+
+    int getMaxCellSizePX() const;
+    int getCellSizePX() const;
+
+    float getGridStartX() const;
+    float getGridStartY() const;
+
+    int getGridDrawWidth() const;
+    int getGridDrawHeight() const;
+
+    int getPanelWidth() const;
+    
 };

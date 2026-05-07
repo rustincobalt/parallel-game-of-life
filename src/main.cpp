@@ -1,8 +1,8 @@
-#include "App.hpp"
+#include "../include/App.hpp"
 
 
 int main(){
-    App GameOfLife = App(800, 800, 120);
+    App GameOfLife = App(800, 800, 30);
     // GameOfLife.Launch();
     GameOfLife.Launch();
 

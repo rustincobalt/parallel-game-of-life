@@ -1,7 +1,7 @@
 #include <cstdint>
 #include <vector>
 #include <cassert>
-
+#include <random>
 
 using std::vector;
 
@@ -41,12 +41,14 @@ class Life{
             {0, 0}      // 8
 };
     
+    // --- FIELDS ---
 
     int rows;
     int width;
     GridCorners CORNERS;
 
-    vector<uint8_t> grid;
+    vector<uint8_t> currGrid;
+    vector<uint8_t> nextGrid;
 
     const uint32_t DEAD_COLOR;
     const uint32_t ALIVE_COLOR;
@@ -54,10 +56,17 @@ class Life{
     vector<uint32_t> PIXEL_LUT;
     vector<uint32_t> pixels; // 0xAABBGGRR
 
-    Life(int h, int w);
-    // ~Life();
+    // ---  ---
 
-    uint8_t sumNeighbours(const vector<uint8_t>&, int cellId);
+
+    // --- CONSTRUCT ---
+
+    Life(int h, int w, uint32_t deadColor, uint32_t aliveColor);
+    Life(int h, int w);
+    
+
+
+    // --- CALC METHODS ---
 
     /// @brief [stRow; enRow]
     void updateRowRange(const vector<uint8_t>& currGrid, vector<uint8_t>& nextGrid,  int stRow, int enRow);
@@ -74,8 +83,11 @@ class Life{
 
     public:
 
+    // --- PUBLIC METHODS ---
+
+    virtual ~Life() = default;
     virtual void updateGrid() = 0;
     virtual void calcPixels() = 0;
     const vector<uint32_t>& getPixels();
-
+    void generateRandomGrid(int seed, int fillPercent);
 };
