@@ -77,6 +77,7 @@ bool AppState::consumeFlag(DirtyFlags flag)
 
 void AppState::requestGridGenerate()
 {
+    isInit = false;
     running = false;
 
     addFlag(GRID_GENERATE);
@@ -130,7 +131,7 @@ void AppState::setRunning(bool value)
 }
 
 void AppState::toggleRunning(){
-    running = !running;
+   setRunning(!running); // IMPORTANT: setRunning performs checks
     // addFlag(RUN_STATE_CHANGED);
 }
 
@@ -141,6 +142,7 @@ void AppState::setMode(int value)
 
     mode = value;
 
+    isInit = false;
     running = false;
 
     addFlag(MODE_CHANGED);
