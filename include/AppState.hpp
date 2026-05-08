@@ -31,6 +31,7 @@ private:
     bool running;
 
     int mode;
+    int selectedTestCase; // for TEST mode
     int algorithm;
 
     int randomFillPercent;
@@ -78,6 +79,7 @@ public:
     void toggleRunning();
 
     void setMode(int value);
+    void setSelectedTestCase(int value);
     void setAlgorithm(int value);
 
     void setRandomFillPercent(int value);
@@ -93,6 +95,7 @@ public:
     bool isRunning() const;
 
     int getMode() const;
+    int getSelectedTestCase() const;
     int getAlgorithm() const;
 
     int getRandomFillPercent() const;
@@ -113,4 +116,6 @@ public:
 
     int getPanelWidth() const;
     
+    void incrementTestCase();
+    void decrementTestCase();
 };

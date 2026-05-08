@@ -3,6 +3,8 @@
 #include <cassert>
 #include <random>
 
+#include "LifePrimitives.hpp"
+
 using std::vector;
 
 class Life{
@@ -89,5 +91,10 @@ class Life{
     virtual void updateGrid() = 0;
     virtual void calcPixels() = 0;
     const vector<uint32_t>& getPixels();
+
     void generateRandomGrid(int seed, int fillPercent);
+    void loadPrimitive(int);
+
+    int getRealHeight() const;
+    int getRealWidth() const;
 };

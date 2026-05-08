@@ -35,7 +35,26 @@ void App::generateTextureFromImage(Texture2D& texture, int w, int h){
 //         simulation->getPixels().data());
 // }
 
-void App::initNewSimulation(){
+void App::generateGridBasedOnMode(){
+
+    if(state.getMode() == 1){
+        simulation->loadPrimitive(state.getSelectedTestCase());
+        
+        // Update AppState
+        state.setCellsX( simulation->getRealWidth());
+        state.setCellsY( simulation->getRealHeight());
+    } 
+    else{
+
+        simulation->generateRandomGrid(
+            state.getRandomSeed(),
+            state.getRandomFillPercent());
+    }
+
+
+}
+
+void App::initSimulationBasedOnAlgorithm(){
       switch (state.getAlgorithm())
     {
         default:
@@ -43,7 +62,6 @@ void App::initNewSimulation(){
                 std::make_unique<LifeSeq>(
                     state.getCellsY(),
                     state.getCellsX());
-            state.setInitStatus(true);
             break;
 
         // case 1:
@@ -56,13 +74,14 @@ void App::initNewSimulation(){
         //     break;
     }
 
+    state.setInitStatus(true);
+
 }
 
 void App::handleEvents(){
 
     if (IsWindowResized())
         state.updateGridLayout(GetScreenWidth(), GetScreenHeight());
-    
     
     if (state.consumeFlag(
             AppState::LAYOUT_CHANGED))    
@@ -77,15 +96,13 @@ void App::handleEvents(){
     {
         state.setRunning(false);
 
-        generateTextureFromImage(gridTexture, state.getCellsX(), state.getCellsY());
+        initSimulationBasedOnAlgorithm();
 
-        initNewSimulation();
-
-        simulation->generateRandomGrid(
-            state.getRandomSeed(),
-            state.getRandomFillPercent());
+        generateGridBasedOnMode();
 
         simulation->calcPixels();
+
+        generateTextureFromImage(gridTexture, state.getCellsX(), state.getCellsY()); // After init and generate
 
         UpdateTexture(
             gridTexture,
@@ -98,7 +115,9 @@ void App::handleEvents(){
             AppState::MODE_CHANGED))
     {
         state.setRunning(false);
-        initNewSimulation();
+
+        initSimulationBasedOnAlgorithm();
+        generateGridBasedOnMode();
     }
 
 

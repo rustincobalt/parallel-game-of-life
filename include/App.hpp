@@ -54,7 +54,10 @@ private:
     // HELP FUNCTIONS
     
     void generateTextureFromImage(Texture2D& texture, int w, int h);
-    void initNewSimulation();
+    
+    void initSimulationBasedOnAlgorithm();
+    void generateGridBasedOnMode();
+    
     void recreateSimulation();
 
 public:

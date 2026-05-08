@@ -174,3 +174,45 @@ void Life::generateRandomGrid(int seed, int fillPercent)
 
     updateCornersPadding(currGrid);
 }
+
+void Life::loadPrimitive(int primitiveId){
+
+    // primitiveId = primitiveId % TOTAL_PRIMITIVES;
+    this->rows = PRIMITIVE_GRID_SIZES[primitiveId][0];
+    this->width = PRIMITIVE_GRID_SIZES[primitiveId][1];
+
+    CORNERS = GridCorners(rows, width);
+    currGrid.assign(rows*width, 0);
+    nextGrid.resize(rows*width);
+    
+    switch (primitiveId) {
+    case 0:
+      currGrid = vector<uint8_t>(MAX_STILL_LIFE, MAX_STILL_LIFE + rows * width);
+      break;
+    case 1:
+      currGrid = vector<uint8_t>(BLOCK, BLOCK + rows * width);
+      break;
+    case 2:
+      currGrid = vector<uint8_t>(BLINKER, BLINKER + rows * width);
+      break;
+    case 3:
+      currGrid = vector<uint8_t>(PULSAR, PULSAR + rows * width);
+      break;
+    case 4:
+      currGrid = vector<uint8_t>(BONE, BONE + rows * width);
+      break;
+    default:
+      currGrid = vector<uint8_t>(MID_SPACESHIP, MID_SPACESHIP + rows * width);
+      break;
+    }
+
+    pixels.resize((rows-2)*(width-2));
+}
+
+
+int Life::getRealHeight() const {
+    return rows-2;
+}
+int Life::getRealWidth() const {
+    return width-2;
+}

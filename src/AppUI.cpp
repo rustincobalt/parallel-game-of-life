@@ -141,16 +141,21 @@ void AppUI::drawTestUI(){
 
     setDropDownAlgoPositionY(y+stepY);
     stepY += textSpacing + blockSpacing;
+    
+    GuiLabel({x, y+stepY, w, h}, TextFormat("Current Primitve: %d", state->getSelectedTestCase()+1));
+    stepY += textSpacing;
+    
+    if (GuiButton({x, y+stepY, w, h}, "Next")) {
+            state->incrementTestCase();
+    }
+    stepY += blockSpacing;
 
     if (GuiButton({x, y+stepY, w, h}, "Previous")) {
-            // TODO
+            state->decrementTestCase();
     }
     stepY += blockSpacing;
 
-    if (GuiButton({x, y+stepY, w, h}, "Next")) {
-            // TODO
-    }
-    stepY += blockSpacing;
+   
 
     if (GuiButton({x, y+stepY, w, h},
         state->isRunning() ? "Stop" : "Start")) {

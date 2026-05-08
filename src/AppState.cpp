@@ -4,6 +4,7 @@ AppState::AppState()
     : isInit(false),
       running(false),
       mode(0),
+      selectedTestCase(0),
       algorithm(0),
       randomFillPercent(30),
       randomSeed(1),
@@ -241,8 +242,42 @@ int AppState::getPanelWidth() const
     return panelWidth;
 }
 
+int AppState::getSelectedTestCase() const {
+    return selectedTestCase;
+}
+
+int AppState::getFPS() const{
+    return fps;
+}
+
+void AppState::setSelectedTestCase(int value)
+{
+    if (selectedTestCase == value)
+        return;
+
+    selectedTestCase = value;
+
+    addFlag(GRID_GENERATE);
+}
+
 void AppState::setFPS(int value)
 {
     fps = value;
     addFlag(FPS_CHANGED);
+}
+
+    
+void AppState::incrementTestCase(){
+    selectedTestCase++;
+    if (selectedTestCase > 5){
+        selectedTestCase = 5;
+    }
+    addFlag(GRID_GENERATE);
+}
+void AppState::decrementTestCase(){
+    selectedTestCase--;
+    if (selectedTestCase < 0){
+        selectedTestCase = 0;
+    }
+    addFlag(GRID_GENERATE);
 }
