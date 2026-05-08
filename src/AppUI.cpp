@@ -11,8 +11,9 @@ AppUI::AppUI(){
     textSpacing = h - margin/2;
     blockSpacing = h + margin;
 
-    cellsXEditMode = true;
-    cellsYEditMode = true;
+    fpsEditMode = false;
+    cellsXEditMode = false;
+    cellsYEditMode = false;
     dropDown00EditMode = false;
     dropDown01EditMode = false;
 
@@ -40,6 +41,14 @@ void AppUI::drawUIBase() {
     else if (state->getMode() == 2) { // MEASURE
         drawMeasureUI();
     }
+
+    GuiLabel({x, GetScreenHeight()-margin-blockSpacing-textSpacing, w, h}, "FPS: ");
+    static int fps = state->getFPS();
+    if( GuiValueBox({x, GetScreenHeight()-margin-blockSpacing, w, h}, nullptr, &fps, 5, 120, fpsEditMode)){
+        state->setFPS(fps);
+        fpsEditMode = !fpsEditMode;
+    }
+
 }
 
 

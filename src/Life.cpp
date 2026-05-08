@@ -169,8 +169,8 @@ void Life::generateRandomGrid(int seed, int fillPercent)
 
     updateVerticalPadding(
         currGrid,
-        0,
-        width - 1);
+        1,
+        realWidth);
 
     updateCornersPadding(currGrid);
 }

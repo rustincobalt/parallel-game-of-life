@@ -9,6 +9,7 @@ AppState::AppState()
       randomSeed(1),
       cellsX(100),
       cellsY(100),
+      fps(30),
       maxCellSizePX(20),
       cellSizePX(1),
       gridStartX(0.0f),
@@ -238,4 +239,10 @@ int AppState::getGridDrawHeight() const
 int AppState::getPanelWidth() const
 {
     return panelWidth;
+}
+
+void AppState::setFPS(int value)
+{
+    fps = value;
+    addFlag(FPS_CHANGED);
 }

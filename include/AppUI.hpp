@@ -23,6 +23,7 @@ class AppUI{
     float blockSpacing;
 
     // --- EditModes ---
+    bool fpsEditMode;
     bool cellsXEditMode;
     bool cellsYEditMode;
 

@@ -68,9 +68,10 @@ void App::handleEvents(){
             AppState::LAYOUT_CHANGED))    
         state.updateGridLayout(GetScreenWidth(), GetScreenHeight());
 
-
+    if (state.consumeFlag(
+            AppState::FPS_CHANGED))    
+        SetTargetFPS(state.getFPS());
         
-
     if (state.consumeFlag(
             AppState::GRID_GENERATE))
     {

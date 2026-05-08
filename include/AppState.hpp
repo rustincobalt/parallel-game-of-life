@@ -6,6 +6,7 @@
 // extern "C" {
 //     #include "..\lib\raygui.h"
 // }
+
 #include <algorithm>
 
 
@@ -18,7 +19,7 @@ class AppState {
         LAYOUT_CHANGED  = 1 << 1, // Any Drawing Grid change: height or cell size in pixels
         GRID_GENERATE   = 1 << 2,
         MODE_CHANGED    = 1 << 3,
-
+        FPS_CHANGED     = 1 << 4
         // SIMULATION_RESET = 1 << 2,
     };
 
@@ -39,6 +40,7 @@ private:
     int cellsY;
 
     // --- Rendering ---
+    int fps;
     double maxCellSizePX;
     double cellSizePX;
 
@@ -81,6 +83,7 @@ public:
     void setRandomFillPercent(int value);
     void setRandomSeed(int value);
 
+    void setFPS(int value);
     void setCellsX(int value);
     void setCellsY(int value);
 
@@ -95,6 +98,7 @@ public:
     int getRandomFillPercent() const;
     int getRandomSeed() const;
 
+    int getFPS() const;
     int getCellsX() const;
     int getCellsY() const;
 
