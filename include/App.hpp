@@ -6,7 +6,12 @@ extern "C" {
 
 #include "AppState.hpp"
 #include "AppUI.hpp"
+
 #include "LifeSeq.hpp"
+#pragma once
+#include "LifeOMPBlocks.hpp"
+#include "LifeOMPColumns.hpp"
+#include "LifeOMPRows.hpp"
 
 #include <string>
 #include <memory>

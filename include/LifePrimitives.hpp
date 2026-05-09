@@ -1,3 +1,4 @@
+#pragma once
 #include <cstdint>
 
 constexpr uint8_t TOTAL_PRIMITIVES = 6;

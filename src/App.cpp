@@ -57,21 +57,42 @@ void App::generateGridBasedOnMode(){
 void App::initSimulationBasedOnAlgorithm(){
       switch (state.getAlgorithm())
     {
+        case 1:
+            simulation =
+                std::make_unique<LifeOMPBlocks>(
+                    state.getCellsY(),
+                    state.getCellsX(),
+                    0XFF000000,
+                    0XFF00A5FF, 
+                    6);
+            break;
+        
+
+        case 2:
+            simulation =
+            std::make_unique<LifeOMPColumns>(
+                state.getCellsY(),
+                state.getCellsX(),
+                0XFF000000,
+                0XFFFF4500, 
+                6);
+            break;
+        case 3:
+            simulation =
+                std::make_unique<LifeOMPRows>(
+                    state.getCellsY(),
+                    state.getCellsX(),
+                    0XFF000000,
+                    0XFFC4008A, 
+                    6);
+            break;
+
         default:
             simulation =
                 std::make_unique<LifeSeq>(
                     state.getCellsY(),
                     state.getCellsX());
             break;
-
-        // case 1:
-        //     simulation =
-        //         std::make_unique<LifeParallel>(
-        //             state.getCellsY(),
-        //             state.getCellsX(),
-        //             DEAD_COLOR,
-        //             ALIVE_COLOR);
-        //     break;
     }
 
     state.setInitStatus(true);
@@ -138,7 +159,7 @@ void App::runAppLoop(){
         // --- UPDATE SIMULATION ---
         if (state.isRunning()) {
             simulation->updateGrid();
-            simulation->calcPixels();
+            // simulation->calcPixels(); Will be calculate in updateGrid
             UpdateTexture(gridTexture, 
                 simulation->getPixels().data());
         }

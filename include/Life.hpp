@@ -1,3 +1,4 @@
+#pragma once
 #include <cstdint>
 #include <vector>
 #include <cassert>
@@ -72,7 +73,10 @@ class Life{
 
     /// @brief [stRow; enRow]
     void updateRowRange(const vector<uint8_t>& currGrid, vector<uint8_t>& nextGrid,  int stRow, int enRow);
-    
+
+    void updateBlock(const vector<uint8_t> &currGrid, vector<uint8_t> &nextGrid,
+                     int stRow, int enRow, int stCol, int enCol);
+
     /// @brief [stRow; enRow]
     void updateHorizontalPadding(vector<uint8_t>& grid, int stRow, int enRow);
     
@@ -81,7 +85,8 @@ class Life{
     void updateCornersPadding(vector<uint8_t> &grid);
 
     /// @brief [stRow; enRow]
-    void calcPixelsRowRange(int stRow, int enRow);
+    void calcPixelsRowRange(const vector<uint8_t>& grid, int stRow, int enRow);
+    void calcPixelsBlock(const vector<uint8_t>& grid, int stRow, int enRow, int stCol, int enCol);
 
     public:
 
@@ -89,6 +94,7 @@ class Life{
 
     virtual ~Life() = default;
     virtual void updateGrid() = 0;
+    virtual void UpdateGridParallelInternal();
     virtual void calcPixels() = 0;
     const vector<uint32_t>& getPixels();
 

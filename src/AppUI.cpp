@@ -214,7 +214,7 @@ void AppUI::drawAlgorithmDropdown()
     int algorithm = state->getAlgorithm();
     GuiLabel({x, dropDownAlgoPositionY, w, h}, "Algorithm");
         if (GuiDropdownBox({x, dropDownAlgoPositionY+textSpacing, w, h},
-            "Sequential;Parallel",
+            "Sequential;OpenMPBlocks;OpenMPColumns;OpenMPRows",
             &algorithm,
             dropDown01EditMode)) {
             dropDown01EditMode = !dropDown01EditMode;

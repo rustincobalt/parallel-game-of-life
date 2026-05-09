@@ -13,11 +13,14 @@ void LifeSeq::updateGrid() {
     updateVerticalPadding(currGrid, 1, width-2);
 
     
-    updateRowRange(currGrid, nextGrid, 1, rows-2);
+    // updateRowRange(currGrid, nextGrid, 1, rows-2);
+    updateBlock(currGrid, nextGrid, 1, rows-2, 1, width-2);
     currGrid.swap(nextGrid);
+    // calcPixelsRowRange(currGrid, 1, rows-2);
+    calcPixelsBlock(nextGrid, 1, rows-2, 1, width-2);
 }
 
 
 void LifeSeq::calcPixels(){
-    calcPixelsRowRange(1, rows-2);
+    calcPixelsRowRange(currGrid, 1, rows-2);
 }

@@ -45,6 +45,10 @@ Life::Life(int h, int w, uint32_t deadColor, uint32_t aliveColor)
 }
 
 
+void Life::UpdateGridParallelInternal() {
+    updateGrid();
+}
+
 void Life::updateRowRange(const vector<uint8_t> &currGrid, vector<uint8_t> &nextGrid, int stRow, int enRow) {
 
     const uint8_t* currGridPtr = currGrid.data();
@@ -53,24 +57,55 @@ void Life::updateRowRange(const vector<uint8_t> &currGrid, vector<uint8_t> &next
     for (int row = stRow; row <= enRow; row++) {
         const int rowStart = row * width;
 
-        const uint8_t *topcell = currGridPtr + rowStart - width + 1;
+        const uint8_t *topCell = currGridPtr + rowStart - width + 1;
         const uint8_t *midCell = currGridPtr + rowStart + 1;
         const uint8_t *botCell = currGridPtr + rowStart + width + 1;
 
         uint8_t *outCell = nextGridPtr + rowStart + 1;
 
         for (int cell = 1; cell < width - 1; cell++) {
-            uint8_t aliveNeighbours = topcell[-1] + topcell[0] + topcell[1] + midCell[-1] + midCell[1] +
+            uint8_t aliveNeighbours = topCell[-1] + topCell[0] + topCell[1] + midCell[-1] + midCell[1] +
                                         botCell[-1] + botCell[0] + botCell[1];
 
             *outCell = STATUS_TABLE[aliveNeighbours][midCell[0]];
 
-            ++topcell;
+            ++topCell;
             ++midCell;
             ++botCell;
             ++outCell;
         }
     }
+}
+
+void Life::updateBlock(const vector<uint8_t> &currGrid, vector<uint8_t> &nextGrid, 
+                        int stRow, int enRow, 
+                        int stCol, int enCol) 
+                        {
+    const uint8_t *currGridPtr = currGrid.data();
+    uint8_t *nextGridPtr = nextGrid.data();
+
+    for (int row = stRow; row <= enRow; row++) {
+        const int rowStart = row * width;
+
+        const uint8_t *topCell = currGridPtr + rowStart - width + stCol;
+        const uint8_t *midCell = currGridPtr + rowStart + stCol;
+        const uint8_t *botCell = currGridPtr + rowStart + width + stCol;
+
+        uint8_t *outCell = nextGridPtr + rowStart + stCol;
+
+        for (int col = stCol; col <= enCol; col++) {
+            uint8_t aliveNeighbours = topCell[-1] + topCell[0] + topCell[1] +
+                                        midCell[-1] + midCell[1] + botCell[-1] +
+                                        botCell[0] + botCell[1];
+
+            *outCell = STATUS_TABLE[aliveNeighbours][midCell[0]];
+
+            ++topCell;
+            ++midCell;
+            ++botCell;
+            ++outCell;
+        }
+  }
 }
 
 void Life::updateHorizontalPadding(vector<uint8_t> &grid, int stRow, int enRow) {
@@ -109,11 +144,11 @@ void Life::updateCornersPadding(vector<uint8_t>& grid)
     grid[CORNERS.bottomRightPad] = grid[CORNERS.topLeftReal];
 }
 
-void Life::calcPixelsRowRange(int stRow, int enRow)
+void Life::calcPixelsRowRange(const vector<uint8_t>& grid, int stRow, int enRow)
 {
     const int realWidth = width - 2;
 
-    const uint8_t* srcPtr = currGrid.data();
+    const uint8_t* srcPtr = grid.data();
     uint32_t* dstPtr = pixels.data();
 
     for (int row = stRow; row <= enRow; row++)
@@ -128,6 +163,32 @@ void Life::calcPixelsRowRange(int stRow, int enRow)
         {
             pixelRow[col] =
                 PIXEL_LUT[cellRow[col]];
+        }
+    }
+}
+
+void Life::calcPixelsBlock(const vector<uint8_t>& grid, int stRow, int enRow, int stCol, int enCol)
+{
+    const int realWidth = width - 2;
+
+    const uint8_t* srcPtr = grid.data();
+    uint32_t* dstPtr = pixels.data();
+
+    for (int row = stRow; row <= enRow; row++)
+    {
+        const uint8_t* cellBlockRow =
+            srcPtr + row * width + stCol;
+
+        uint32_t* pixelBlockRow =
+            dstPtr + (row - 1) * realWidth + (stCol - 1);
+
+        for (int col = stCol; col <= enCol; col++)
+        {
+            pixelBlockRow[0] =
+                PIXEL_LUT[cellBlockRow[0]];
+            
+            ++pixelBlockRow;
+            ++cellBlockRow;
         }
     }
 }
@@ -184,7 +245,7 @@ void Life::loadPrimitive(int primitiveId){
     CORNERS = GridCorners(rows, width);
     currGrid.assign(rows*width, 0);
     nextGrid.resize(rows*width);
-    
+
     switch (primitiveId) {
     case 0:
       currGrid = vector<uint8_t>(MAX_STILL_LIFE, MAX_STILL_LIFE + rows * width);

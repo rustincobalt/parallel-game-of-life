@@ -1,4 +1,6 @@
 .vscode
 *.exe
 hints
+omp.h
+.clangd
 
