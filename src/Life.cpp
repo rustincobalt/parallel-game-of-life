@@ -277,3 +277,8 @@ int Life::getRealHeight() const {
 int Life::getRealWidth() const {
     return width-2;
 }
+
+bool Life::operator==(const Life& other) const
+{
+    return currGrid == other.currGrid;
+}

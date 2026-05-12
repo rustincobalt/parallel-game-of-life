@@ -17,10 +17,15 @@ void LifeSeq::updateGrid() {
     updateBlock(currGrid, nextGrid, 1, rows-2, 1, width-2);
     currGrid.swap(nextGrid);
     // calcPixelsRowRange(currGrid, 1, rows-2);
-    calcPixelsBlock(nextGrid, 1, rows-2, 1, width-2);
+    // calcPixelsBlock(currGrid, 1, rows-2, 1, width-2);
 }
 
 
 void LifeSeq::calcPixels(){
     calcPixelsRowRange(currGrid, 1, rows-2);
+}
+
+void LifeSeq::runUpdateIterations(int iterations){
+    for (int i = 0; i < iterations; i++)
+        this->updateGrid();
 }

@@ -1,8 +1,23 @@
 #include "../include/LifeOMPColumns.hpp"
 
-void LifeOMPColumns::calculateColumnChunkSize(){
-    const int realColumns = width-2;
-    colChunkSize = std::max(1, realColumns / threadsNumber);
+void LifeOMPColumns::calculateColumnChunkSize() {
+    const int realRows = rows - 2;
+
+    if (realRows < 256) {
+        colChunkSize = 1;
+        return;
+    }
+
+    const int targetChunks = threadsNumber * 1.8;
+
+    int chunk = realRows / targetChunks;
+
+    chunk = (chunk / 64) * 64;
+
+    if (chunk < 64)
+        chunk = 64;
+
+    colChunkSize = chunk;
 }
 
 LifeOMPColumns::LifeOMPColumns(
@@ -41,16 +56,12 @@ void LifeOMPColumns::UpdateGridParallelInternal()
     #pragma omp single
     updateCornersPadding(currGrid);
 
-    #pragma omp for schedule(static)
-    for (int col = 1; col < width - 1; col += colChunkSize)
+    #pragma omp for schedule(dynamic)
+    for (int col = 1; col < width - 1; col+=colChunkSize)
     {
         const int enCol = std::min( col + colChunkSize - 1, width - 2);
 
         updateBlock(currGrid, nextGrid,
-            1, rows - 2,
-            col, enCol);
-
-        calcPixelsBlock(nextGrid,
             1, rows - 2,
             col, enCol);
     }
@@ -65,31 +76,26 @@ void LifeOMPColumns::updateGrid()
 
     #pragma omp parallel num_threads(threadsNumber)
     {
-        #pragma single nowait
+        #pragma omp single nowait
         updateHorizontalPadding(currGrid, 1, rows - 2);
         
 
-        #pragma single nowait
+        #pragma omp single nowait
         updateVerticalPadding(currGrid, 1, width - 2);
         
 
-        #pragma single // implicit barrier
+        #pragma omp single // implicit barrier
         updateCornersPadding(currGrid);
 
 
-        #pragma omp for schedule(static)
-        for (int col = 1; col < width - 1; col += colChunkSize)
+        #pragma omp for schedule(dynamic)
+        for (int col = 1; col < width - 1; col+=colChunkSize)
         {
-            const int endCol = std::min(col + colChunkSize - 1, width - 2);
+            const int enCol = std::min(col + colChunkSize - 1, width - 2);
 
             updateBlock( currGrid, nextGrid,
                 1, rows -2,
-                col, endCol);
-
-
-            calcPixelsBlock( nextGrid,
-                1, rows - 2,
-                col, endCol);
+                col, enCol);
         }
     }
 
@@ -111,4 +117,13 @@ void LifeOMPColumns::calcPixels()
             enCol);
     }
     
+}
+
+void LifeOMPColumns::runUpdateIterations(int iterations){
+    #pragma omp parallel num_threads(threadsNumber)
+    {
+        for (int i = 0; i < iterations; i++) {
+            UpdateGridParallelInternal();
+        }
+    }
 }

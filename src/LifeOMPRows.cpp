@@ -1,8 +1,24 @@
 #include "../include/LifeOMPRows.hpp"
 
-void LifeOMPRows::calculateRowChunkSize(){
-    const int realRows = rows-2;
-    rowChunkSize = std::max(1, realRows / threadsNumber);
+void LifeOMPRows::calculateRowChunkSize() {
+    const int realRows = rows - 2;
+    
+    if (realRows < 256) {
+        rowChunkSize = 1;
+        return;
+    }
+
+    const int targetChunks = threadsNumber * 1.8;
+
+
+    int chunk = realRows / targetChunks;
+
+    chunk = (chunk / 64) * 64;
+
+    if (chunk < 64)
+        chunk = 64;
+
+    rowChunkSize = chunk;
 }
 
 LifeOMPRows::LifeOMPRows(
@@ -41,16 +57,12 @@ void LifeOMPRows::UpdateGridParallelInternal()
     #pragma omp single
     updateCornersPadding(currGrid);
 
-    #pragma omp for schedule(static)
+    #pragma omp for schedule(dynamic)
     for (int row = 1; row < rows - 1; row += rowChunkSize){
         
         const int enRow = std::min(row + rowChunkSize - 1, rows - 2);
 
         updateBlock(currGrid, nextGrid,
-            row, enRow,
-            1, width - 2);
-
-        calcPixelsBlock(nextGrid, 
             row, enRow,
             1, width - 2);
     }
@@ -63,19 +75,19 @@ void LifeOMPRows::updateGrid()
 {   
     #pragma omp parallel num_threads(threadsNumber)
     {
-        #pragma single nowait
+        #pragma omp single nowait
         updateHorizontalPadding(currGrid, 1, rows - 2);
         
 
-        #pragma single nowait
+        #pragma omp single nowait
         updateVerticalPadding(currGrid, 1, width - 2);
         
 
-        #pragma single // implicit barrier
+        #pragma omp single // implicit barrier
         updateCornersPadding(currGrid);
 
 
-        #pragma omp for schedule(static)
+        #pragma omp for schedule(dynamic)
         for (int row = 1; row < rows - 1; row += rowChunkSize){
         
             const int enRow = std::min(row + rowChunkSize - 1, rows - 2);
@@ -83,13 +95,8 @@ void LifeOMPRows::updateGrid()
             updateBlock(currGrid, nextGrid,
                 row, enRow,
                 1, width - 2);
-
-            calcPixelsBlock(nextGrid,
-                row, enRow,
-                1, width - 2);
         }
     }
-
     currGrid.swap(nextGrid);
 }
 
@@ -107,4 +114,13 @@ void LifeOMPRows::calcPixels()
             width-2);
     }
     
+}
+
+void LifeOMPRows::runUpdateIterations(int iterations){
+    #pragma omp parallel num_threads(threadsNumber)
+    {
+        for (int i = 0; i < iterations; i++) {
+            UpdateGridParallelInternal();
+        }
+    }
 }

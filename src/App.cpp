@@ -159,7 +159,7 @@ void App::runAppLoop(){
         // --- UPDATE SIMULATION ---
         if (state.isRunning()) {
             simulation->updateGrid();
-            // simulation->calcPixels(); Will be calculate in updateGrid
+            simulation->calcPixels(); 
             UpdateTexture(gridTexture, 
                 simulation->getPixels().data());
         }

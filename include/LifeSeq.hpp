@@ -11,4 +11,5 @@ class LifeSeq : public Life {
 
     virtual void updateGrid() override;
     virtual void calcPixels() override;
+    virtual void runUpdateIterations(int iterations) override;
 };

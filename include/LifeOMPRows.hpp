@@ -20,8 +20,7 @@ public:
         int threads);
 
     virtual void updateGrid() override;
-
     virtual void calcPixels() override;
-
+    virtual void runUpdateIterations(int iterations) override;
     virtual void UpdateGridParallelInternal() override;
 };

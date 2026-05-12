@@ -96,6 +96,7 @@ class Life{
     virtual void updateGrid() = 0;
     virtual void UpdateGridParallelInternal();
     virtual void calcPixels() = 0;
+    virtual void runUpdateIterations(int iterations) = 0;
     const vector<uint32_t>& getPixels();
 
     void generateRandomGrid(int seed, int fillPercent);
@@ -103,4 +104,6 @@ class Life{
 
     int getRealHeight() const;
     int getRealWidth() const;
+
+    bool operator==(const Life& other) const;
 };

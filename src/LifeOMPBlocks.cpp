@@ -56,14 +56,14 @@ void LifeOMPBlocks::UpdateGridParallelInternal() {
     updateCornersPadding(currGrid);
     
 
-    #pragma omp for collapse(2) schedule(static)
-    for (int row = 1; row < rows - 1; row += blockHeight) {
-        for (int col = 1; col < width - 1; col += blockWidth) {
+    #pragma omp for collapse(2) schedule(dynamic)
+    for (int row = 1; row < rows - 1; row+=blockHeight) {
+        for (int col = 1; col < width - 1; col++) {
             const int endRow = std::min(row + blockHeight - 1, rows - 2);
-            const int endCol = std::min(col + blockWidth - 1, width - 2);
+            // const int endCol = std::min(col + blockWidth - 1, width - 2);
 
-            updateBlock(currGrid, nextGrid, row, endRow, col, endCol);
-            calcPixelsBlock(nextGrid, row, endRow, col, endCol);
+            updateBlock(currGrid, nextGrid, row, endRow, col, col);
+            calcPixelsBlock(nextGrid, row, endRow, col, col);
         }
     }
 
@@ -97,24 +97,24 @@ void LifeOMPBlocks::updateGrid()
         
 
 
-        #pragma omp for collapse(2) schedule(static)
-        for (int row = 1; row < rows - 1; row += blockHeight){
-            for (int col = 1; col < width - 1; col += blockWidth){
+        #pragma omp for collapse(2) schedule(dynamic)
+        for (int row = 1; row < rows - 1; row+=blockHeight){
+            for (int col = 1; col < width - 1; col++){
                 const int endRow = std::min(row + blockHeight - 1, rows - 2);
-                const int endCol = std::min(col + blockWidth - 1, width - 2);
+                // const int endCol = std::min(col + blockWidth - 1, width - 2);
 
                 updateBlock(currGrid,
                     nextGrid,
                     row,
                     endRow,
                     col,
-                    endCol);
+                    col);
 
                 calcPixelsBlock(nextGrid,
                     row,
                     endRow,
                     col,
-                    endCol);
+                    col);
             }
         }     
     }
@@ -124,7 +124,7 @@ void LifeOMPBlocks::updateGrid()
 
 void LifeOMPBlocks::calcPixels()
 {
-    #pragma omp parallel for collapse(2) schedule(static) num_threads(threadsNumber)
+    #pragma omp parallel for collapse(2) schedule(dynamic) num_threads(threadsNumber)
     for (int row = 1; row < rows - 1; row += blockHeight){
         for (int col = 1; col < width - 1; col += blockWidth){
             const int endRow =
@@ -138,6 +138,15 @@ void LifeOMPBlocks::calcPixels()
                 endRow,
                 col,
                 endCol);
+        }
+    }
+}
+
+void LifeOMPBlocks::runUpdateIterations(int iterations){
+    #pragma omp parallel num_threads(threadsNumber)
+    {
+        for (int i = 0; i < iterations; i++) {
+            UpdateGridParallelInternal();
         }
     }
 }
